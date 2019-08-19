@@ -1,0 +1,14 @@
+OCAMLC    := ocamlc
+OCAMLOPT  := ocamlopt
+OCAMLRUN  := ocamlrun
+OCAMLDEP  := ocamldep
+OCAMLFIND := ocamlfind
+
+OCAMLFLAGS ?= -annot
+
+%.cmi : %.mli
+	$(OCAMLC) -c -o $@ $(OCAMLFLAGS) $(INCLUDES) $<
+%.cmo %.cmi: %.ml
+	$(OCAMLC) -c -o $@ $(OCAMLFLAGS) $(INCLUDES) $<
+%.cmx %.cmi: %.ml
+	$(OCAMLOPT) -c -o $@ $(OCAMLFLAGS) $(INCLUDES) $<
