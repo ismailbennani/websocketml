@@ -1,13 +1,19 @@
+include config
+
 .PHONY: lib examples test
 
 all: lib examples
 
-install: lib
-	mkdir -p /usr/local/lib/websocketml/
-	cp lib/* /usr/local/lib/websocketml/
+config:
+	./configure
 
-lib:
+install: lib
+	mkdir -p $(LIBDIR)
+	cp lib/* $(LIBDIR)
+
+lib: config
 	$(MAKE) -C src
+	mkdir -p lib
 	cp src/*.cmi src/*.cma lib
 
 examples: lib
@@ -20,3 +26,4 @@ clean cleanall realclean:
 	$(MAKE) -C src clean
 	$(MAKE) -C examples clean
 	$(MAKE) -C test clean
+	rm -f config META opam
