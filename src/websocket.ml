@@ -1,7 +1,6 @@
 (* RFC6455 *)
 
 open Bytes
-open Unix
 
 open Types
 open Utils
@@ -12,7 +11,7 @@ type t = {
   mutable closed_in : bool;
 }
 
-let string_of_t sock = string_of_client sock.client
+let to_string sock = string_of_client sock.client
 
 let create sock addr = {
   client = { sock = sock;
@@ -27,22 +26,18 @@ let closed_out sock = sock.closed_out
 let closed_in sock = sock.closed_in
 let closed sock = sock.closed_in || sock.closed_out
 
-let recv_bytes sock size =
+let recv_bytes sock rcv_buffer offset size =
   if closed_in sock then
-    raise (WSError
-             (Printf.sprintf
-                "WebSocket.recv_bytes : Connection is closed, cannot send \"%s\"" (string_of_t sock)));
-  let rcv_buffer = Bytes.create size in
-  recv (get_sock sock) rcv_buffer 0 size [];
+    raise (WSError "WebSocket.recv_bytes : Connection is closed");
+  let code = Unix.recv (get_sock sock) rcv_buffer offset size [] in
   Logger.debug (fun m -> m "Received bytes\n%s" (hex_string_of_bytes rcv_buffer));
-  rcv_buffer
+  code
+
 let send_bytes sock b =
   if closed_out sock then
-    raise (WSError
-             (Printf.sprintf
-                "WebSocket.send_bytes : Connection is closed, cannot send \"%s\"" (Bytes.to_string b)));
+    raise (WSError "WebSocket.send_bytes : Connection is closed");
   Logger.debug (fun m -> m "Sending bytes\n%s" (hex_string_of_bytes b));
-  send (get_sock sock) b 0 (Bytes.length b) []
+  Unix.send (get_sock sock) b 0 (Bytes.length b) []
 
 let build_frame op data =
   let data_len = Bytes.length data in
@@ -107,8 +102,9 @@ let close sock status_code =
       data
     end
   in
-  send_close sock data;
-  sock.closed_out <- true
+  let code = send_close sock data in
+  sock.closed_out <- true;
+  code
 
 let do_close sock frame =
   (* optional status *)
@@ -129,7 +125,9 @@ let do_close sock frame =
 let receive_frame sock =
   Logger.debug (fun m -> m "%s" "Waiting for frame ...");
 
-  let rcv_buffer = recv_bytes sock 2 in
+  let rcv_buffer = Bytes.create 2 in
+
+  ignore (recv_bytes sock rcv_buffer 0 2);
 
   (* first byte is : FIN(1) RSV1(1) RSV2(1) RSV3(1) OPCODE(4)*)
   let first_byte = get_uint8 rcv_buffer 0 in
@@ -163,16 +161,19 @@ let receive_frame sock =
      else payload len is the payload length (in bytes)*)
   let payload_len =
     if payload_len = 126 then begin
-      let rcv_buffer = recv_bytes sock 2 in get_uint8 rcv_buffer 0
+      ignore (recv_bytes sock rcv_buffer 2 2);
+      get_uint8 rcv_buffer 0
     end else if payload_len = 126 then begin
-      let rcv_buffer = recv_bytes sock 8 in Int64.to_int (get_int64_be rcv_buffer 0)
+      ignore (recv_bytes sock rcv_buffer 2 8);
+      Int64.to_int (get_int64_be rcv_buffer 0)
     end else payload_len
   in
 
   Logger.debug (fun m -> m "Real PAYLOAD LEN : %d" payload_len);
 
   (* get the masking key (32 bits) *)
-  let masking_key = recv_bytes sock 4 in
+  let masking_key = Bytes.create 4 in
+  ignore (recv_bytes sock masking_key 0 4);
 
   Logger.debug (fun m -> m "MASKING KEY : 0x%02x 0x%02x 0x%02x 0x%02x"
                    (int_of_char (Bytes.get masking_key 0))
@@ -183,7 +184,8 @@ let receive_frame sock =
   let data =
     if payload_len > 0 then
       (* get the data *)
-      let payload_data = recv_bytes sock payload_len in
+      let payload_data = Bytes.create payload_len in
+      ignore (recv_bytes sock payload_data 0 payload_len);
       (* decode the data *)
       unmask_data masking_key payload_data
     else Bytes.empty
@@ -201,18 +203,21 @@ let receive_message sock =
     (* update msg_type and msg_buffer *)
     begin match frame.opcode with
       | ContinuationFrame ->
-        if first_frame then raise (WSError "The opcode Continuation cannot be used in the first frame of a message");
+        if first_frame then
+          raise (WSError "The opcode Continuation cannot be used in the first frame of a message");
         Buffer.add_bytes msg_buffer frame.frame_data
       | TextFrame ->
-        if not first_frame then raise (WSError "The opcode TextFrame can only be used in the first frame of a message");
+        if not first_frame then
+          raise (WSError "The opcode TextFrame can only be used in the first frame of a message");
         msg_type := Some TextMsg;
         Buffer.add_bytes msg_buffer frame.frame_data
       | BinaryFrame ->
-        if not first_frame then raise (WSError "The opcode BinaryFrame can only be used in the first frame of a message")
-            msg_type := Some BinaryMsg;
+        if not first_frame then
+          raise (WSError "The opcode BinaryFrame can only be used in the first frame of a message");
+        msg_type := Some BinaryMsg;
         Buffer.add_bytes msg_buffer frame.frame_data
-      | Close -> do_close sock frame; ()
-      | Ping -> send_pong sock frame.frame_data; ()
+      | Close -> ignore (do_close sock frame)
+      | Ping -> ignore (send_pong sock frame.frame_data)
       | Pong ->
         let string_data = Bytes.to_string frame.frame_data in
         Logger.debug (fun m -> m "%s" ("Received pong from sock with content : " ^ string_data))
@@ -236,6 +241,6 @@ let receive_message sock =
       | None -> assert false
       | Some typ ->
         Some { msg_typ = typ; msg_data = Buffer.to_bytes msg_buffer }
-    (* else continue reading new frames *)
+        (* else continue reading new frames *)
     else aux false
   in aux true

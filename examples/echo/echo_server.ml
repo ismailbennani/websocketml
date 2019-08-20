@@ -90,7 +90,7 @@ let _ =
           Logger.info (fun m -> m "Waiting for message");
           msg := Websocket.receive_message websock
         end else
-          Websocket.close websock Types.NormalClosure;
+          ignore (Websocket.close websock Types.NormalClosure);
       done
 
     with e -> Logger.error (fun m -> m "Exception : %s" (Printexc.to_string e))

@@ -30,9 +30,9 @@ end
 let verbose = ref 1
 
 let print ff color prefix f =
-  Printf.printf "%s%-7s " color ("[" ^ prefix ^ "]");
-  f Printf.printf;
-  Printf.printf "%s\n" EscCodes.none;
+  Printf.fprintf ff "%s%-7s " color ("[" ^ prefix ^ "]");
+  f (Printf.fprintf ff);
+  Printf.fprintf ff "%s\n" EscCodes.none;
   flush stdout
 
 let print_level level ff color prefix f =

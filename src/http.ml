@@ -1,7 +1,6 @@
 (* This is a very simple HTTP/1.1 server implementation [RFC2616] *)
 
 open Unix
-open Utils
 open Types
 
 let print_address ff sockaddr =
@@ -127,11 +126,7 @@ let print_request ff req =
 (* *)
 
 (* server type, it corresponds to the root location *)
-type t = {
-  addr : Unix.sockaddr;
-  sock : Unix.file_descr;
-}
-
+type t = Types.client
 let addr serv = serv.addr
 let sock serv = serv.sock
 
@@ -208,8 +203,9 @@ let send_response sock status fields =
                       fields)) ^
                 "\n\n"
   in
-  send sock (Bytes.of_string message) 0 (String.length message) [];
-  Logger.info (fun m -> m "Sent:\n%s" message)
+  let code = send sock (Bytes.of_string message) 0 (String.length message) [] in
+  Logger.info (fun m -> m "Sent:\n%s" message);
+  code
 
 
 let check_ws_opening_request req =
@@ -277,7 +273,7 @@ let check_ws_opening_request req =
 
 let do_ws_handshake sock =
   let rcv_buffer = Bytes.create 1024 in
-  recv sock rcv_buffer 0 1024 [];
+  ignore (recv sock rcv_buffer 0 1024 []);
   let req = Bytes.to_string rcv_buffer in
   (* If the message is more than 1024 bytes long, this won't work *)
   let req = String.sub req 0 (String.index req '\000') in
@@ -304,7 +300,7 @@ let do_ws_handshake sock =
   (* build response to opening request, page 22 *)
 
   (* get origin key if present *)
-  let origin =
+  (* let origin =
     match FieldMap.find_opt "Origin" req.fields with
     | None -> None
     | Some origin ->
@@ -312,7 +308,7 @@ let do_ws_handshake sock =
         raise (WSError ("The optional field Origin MUST have one and only one value"));
       let origin = String.lowercase_ascii (List.hd origin) in
       Some origin
-  in
+  in *)
 
   (* get ws key *)
   (* size of list has been checked before *)
@@ -323,16 +319,16 @@ let do_ws_handshake sock =
   if List.length version <> 1 then
     raise (WSError ("The field Sec-WebSocket-Version MUST have one and only one value"));
   if (List.hd version) <> "13" then begin
-    send_response sock "426 Upgrade Required" [
-      "Sec-WebSocket-Version", "13" ];
+    ignore (send_response sock "426 Upgrade Required" [
+      "Sec-WebSocket-Version", "13" ]);
     raise (WSError ("Unsupported WebSocket version" ^ (List.hd version)))
   end;
 
   (* subprotocol to use : none implemented yet *)
   (* extensions to use : none implemented yet *)
 
-  send_response sock "101 Switching Protocols" [
+  ignore (send_response sock "101 Switching Protocols" [
     "Upgrade", "websocket";
     "Connection", "Upgrade";
     "Sec-WebSocket-Accept", build_server_key encoded_ws_key;
-  ]
+  ])

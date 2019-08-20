@@ -26,14 +26,12 @@ OCAMLRUN  := ocamlrun
 OCAMLDEP  := ocamldep
 OCAMLFIND := ocamlfind
 
-OCAMLFLAGS ?= -annot
-
 %.cmi : %.mli
-	\$(OCAMLC) -c -o $@ \$(OCAMLFLAGS) \$(INCLUDES) $<
+	\$(OCAMLC) -c -o \$@ \$(OCAMLFLAGS) \$(INCLUDES) \$<
 %.cmo %.cmi: %.ml
-	\$(OCAMLC) -c -o $@ \$(OCAMLFLAGS) \$(INCLUDES) $<
+	\$(OCAMLC) -c -o \$@ \$(OCAMLFLAGS) \$(INCLUDES) \$<
 %.cmx %.cmi: %.ml
-	\$(OCAMLOPT) -c -o $@ \$(OCAMLFLAGS) \$(INCLUDES) $<
+	\$(OCAMLOPT) -c -o \$@ \$(OCAMLFLAGS) \$(INCLUDES) \$<
 ENDOFFILE
 
 cat > META <<ENDOFFILE
