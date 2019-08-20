@@ -28,24 +28,24 @@ let _ =
   let inet_addr = Unix.ADDR_INET(address, port) in
 
   (* create the small server *)
-  let connection_server = Http.create inet_addr in
+  let connection_server = Websocketml.http_create inet_addr in
 
   (* wait for a connexion *)
-  let client_sock, client_addr = Http.listen_and_accept connection_server in
+  let client_sock, client_addr = Websocketml.http_listen_and_accept connection_server in
 
   begin
     try
       (* do the websocket handshake,
          if there is no exception, everything is ok *)
-      Http.do_ws_handshake client_sock;
+      Websocketml.http_do_ws_handshake client_sock;
 
       (* create the websocket connection *)
-      let websock = Websocket.create client_sock client_addr in
+      let websock = Websocketml.create client_sock client_addr in
 
       (* listen for a websocket message *)
       (* Note : it can be None, for example if the first frame
          is a CLOSE frame *)
-      let msg = Websocket.receive_message websock in
+      let msg = Websocketml.receive_message websock in
       begin match msg with
         | None -> ()
         | Some msg ->
@@ -59,20 +59,20 @@ let _ =
 
       (* send something back *)
       let to_send = "YOU are breathtaking!" in
-      ignore (Websocket.send_text websock to_send);
+      ignore (Websocketml.send_text websock to_send);
       Logger.info (fun m -> m "Sent message : %s" to_send);
 
       (* send a ping message*)
-      ignore (Websocket.send_ping websock (Bytes.of_string "Hello world"));
+      ignore (Websocketml.send_ping websock (Bytes.of_string "Hello world"));
       Logger.info (fun m -> m "Sent ping");
 
       (* this time we expect to get a CLOSE message, msg can be None *)
       Logger.info (fun m -> m "Waiting for message");
-      let msg = ref (Websocket.receive_message websock) in
+      let msg = ref (Websocketml.receive_message websock) in
       (* the stack of answers *)
       let msg_stack = ref msgs in
 
-      while not (Websocket.closed websock) && (List.length !msg_stack > 0) do
+      while not (Websocketml.closed websock) && (List.length !msg_stack > 0) do
 
         begin match !msg with
           | None -> Logger.info (fun m -> m "empty message")
@@ -81,18 +81,18 @@ let _ =
 
         (* send one of the answers *)
         let to_send = (List.hd !msg_stack) in
-        ignore (Websocket.send_text websock to_send);
+        ignore (Websocketml.send_text websock to_send);
         Logger.info (fun m -> m "Sent message : %s" to_send);
         msg_stack := List.tl !msg_stack;
 
         (* if there are more answers we continue listening, else we disconnect *)
         if List.length !msg_stack > 0 then begin
           Logger.info (fun m -> m "Waiting for message");
-          msg := Websocket.receive_message websock
+          msg := Websocketml.receive_message websock
         end else
-          ignore (Websocket.close websock Types.NormalClosure);
+          ignore (Websocketml.close websock Websocketml.NormalClosure);
       done
 
     with e -> Logger.error (fun m -> m "Exception : %s" (Printexc.to_string e))
   end;
-  Http.close connection_server
+  Websocketml.http_close connection_server

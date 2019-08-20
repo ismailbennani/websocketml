@@ -1,9 +1,147 @@
 (* RFC6455 *)
 
 open Bytes
-
-open Types
 open Utils
+
+exception WSError of string
+exception NotImplemented of string
+
+(* ============================================ *)
+(*                    OPCODE                    *)
+(* ============================================ *)
+
+type opcode =
+  | ContinuationFrame | TextFrame | BinaryFrame | Close | Ping | Pong
+  | ControlFrame of int | NonControlFrame of int
+
+let int_of_opcode = function
+  | ContinuationFrame -> 0 | TextFrame -> 1 | BinaryFrame -> 2
+  | Close -> 8 | Ping -> 9 | Pong -> 10
+  | ControlFrame i | NonControlFrame i -> i
+
+let opcode_of_int i =
+  if i = 0  then ContinuationFrame
+  else if i = 1  then TextFrame
+  else if i = 2  then BinaryFrame
+  else if i = 3  then NonControlFrame 3
+  else if i = 4  then NonControlFrame 4
+  else if i = 5  then NonControlFrame 5
+  else if i = 6  then NonControlFrame 6
+  else if i = 7  then NonControlFrame 7
+  else if i = 8  then Close
+  else if i = 9  then Ping
+  else if i = 10 then Pong
+  else if i = 11 then ControlFrame 11
+  else if i = 12 then ControlFrame 12
+  else if i = 13 then ControlFrame 13
+  else if i = 14 then ControlFrame 14
+  else if i = 15 then ControlFrame 15
+  else raise (WSError ("Unknown op code " ^ (string_of_int i)))
+
+let string_of_opcode = function
+  | ContinuationFrame -> "ContinuationFrame" | TextFrame -> "TextFrame"
+  | BinaryFrame -> "BinaryFrame" | Close -> "Close"
+  | Ping -> "Ping" | Pong -> "Pong"
+  | ControlFrame i -> "ControlFrame " ^ (string_of_int i)
+  | NonControlFrame i -> "NonControlFrame " ^ (string_of_int i)
+
+let is_controlop = function
+  | ContinuationFrame | TextFrame | BinaryFrame | NonControlFrame _ -> false
+  | Close | Ping | Pong | ControlFrame _ -> true
+
+(* ============================================ *)
+(*                 STATUS CODE                  *)
+(* ============================================ *)
+
+(* cf. RFC6455 page 46 *)
+type exit_code =
+  (* These are defined in the RFC *)
+  | NormalClosure       (* 1000 *)
+  | GoingAway           (* 1001 *)
+  | ProtocolError       (* 1002 *)
+  | UnkownDatatype      (* 1003 *)
+  | NoStatusCode        (* 1005 *)
+  | AbnormalClosure     (* 1006 *)
+  | InconsistentData    (* 1007 *)
+  | PolicyViolation     (* 1008 *)
+  | MsgTooBig           (* 1009 *)
+  | RequiredExtension   (* 1010 *)
+  | UnexpectedCondition (* 1011 *)
+  | TLSFailure          (* 1015 *)
+  | ReservedCode of int (* ranges :
+                            0 - 999 : not used
+                            1000 - 2999 : reserved for websocket protocol
+                            3000 - 3999 : reserved for public libraries *)
+  | CustomCode of int   (* range 4000 - 4999 : private use *)
+
+let reserved_exit_code = function
+  | NormalClosure | GoingAway | ProtocolError | UnkownDatatype
+  | InconsistentData | PolicyViolation | MsgTooBig | RequiredExtension
+  | UnexpectedCondition -> false
+  | NoStatusCode | AbnormalClosure | TLSFailure
+  | ReservedCode _ | CustomCode _ -> true
+
+let int_of_exit_code = function
+  | NormalClosure       -> 1000
+  | GoingAway           -> 1001
+  | ProtocolError       -> 1002
+  | UnkownDatatype      -> 1003
+  | NoStatusCode        -> 1005
+  | AbnormalClosure     -> 1006
+  | InconsistentData    -> 1007
+  | PolicyViolation     -> 1008
+  | MsgTooBig           -> 1009
+  | RequiredExtension   -> 1010
+  | UnexpectedCondition -> 1011
+  | TLSFailure          -> 1015
+  | ReservedCode i | CustomCode i -> i
+
+let exit_code_of_int i =
+  if i = 1000 then NormalClosure
+  else if i = 1001 then GoingAway
+  else if i = 1002 then ProtocolError
+  else if i = 1003 then UnkownDatatype
+  else if i = 1005 then NoStatusCode
+  else if i = 1006 then AbnormalClosure
+  else if i = 1007 then InconsistentData
+  else if i = 1008 then PolicyViolation
+  else if i = 1009 then MsgTooBig
+  else if i = 1010 then RequiredExtension
+  else if i = 1011 then UnexpectedCondition
+  else if i = 1015 then TLSFailure
+  else if i >= 0 && i <= 999 ||
+          i >= 1000 && i <= 2999 ||
+          i >= 3000 && i <= 3999 then ReservedCode i
+  else if i >= 4000 && i <= 4999 then CustomCode i
+  else raise (WSError ("Unknown exit code " ^ string_of_int i))
+
+(* ============================================ *)
+(*                   FRAME                      *)
+(* ============================================ *)
+
+type frame = { fin : bool; opcode : opcode; frame_data : bytes}
+
+(* ============================================ *)
+(*                    MSG                       *)
+(* ============================================ *)
+
+type msg_type = BinaryMsg | TextMsg
+type msg = { msg_typ : msg_type; msg_data : bytes }
+
+(* ============================================ *)
+(*                   CLIENT                     *)
+(* ============================================ *)
+
+type client = {
+  addr : Unix.sockaddr;
+  sock : Unix.file_descr
+}
+
+let string_of_client c = string_of_sockaddr c.addr
+
+(* ============================================ *)
+(*                  WEBSOCKET                   *)
+(* ============================================ *)
 
 type t = {
   client : client;
@@ -93,12 +231,12 @@ let send_close sock data = send_msg sock Close data
 let send_text sock msg = send_msg sock TextFrame (Bytes.of_string msg)
 let send_binary sock data = send_msg sock BinaryFrame data
 
-let close sock status_code =
+let close sock exit_code =
   let data =
-    if reserved_status_code status_code then Bytes.empty
+    if reserved_exit_code exit_code then Bytes.empty
     else begin
       let data = Bytes.create 2 in
-      set_uint16_be data 0 (int_of_status_code status_code);
+      set_uint16_be data 0 (int_of_exit_code exit_code);
       data
     end
   in
@@ -107,7 +245,7 @@ let close sock status_code =
   code
 
 let do_close sock frame =
-  (* optional status *)
+  (* optional exit code *)
   let code =
     if Bytes.length frame.frame_data >= 2 then
       get_uint16_be frame.frame_data 0
@@ -120,7 +258,7 @@ let do_close sock frame =
   in
   Logger.debug (fun m -> m "WebSocket connection closed with code %d and reason : %s" code reason);
   sock.closed_in <- true;
-  close sock (status_code_of_int code)
+  close sock (exit_code_of_int code)
 
 let receive_frame sock =
   Logger.debug (fun m -> m "%s" "Waiting for frame ...");

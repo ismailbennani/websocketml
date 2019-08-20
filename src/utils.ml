@@ -1,5 +1,3 @@
-open Types
-
 let hex_string_of_bytes b =
   let res = ref ["\t\t"] in
   for i = 0 to Bytes.length b - 1 do
@@ -10,18 +8,9 @@ let hex_string_of_bytes b =
   done;
   String.concat "" (List.rev !res)
 
-let string_of_opcode = function
-  | ContinuationFrame -> "ContinuationFrame" | TextFrame -> "TextFrame"
-  | BinaryFrame -> "BinaryFrame" | Close -> "Close"
-  | Ping -> "Ping" | Pong -> "Pong"
-  | ControlFrame i -> "ControlFrame " ^ (string_of_int i)
-  | NonControlFrame i -> "NonControlFrame " ^ (string_of_int i)
-
 let string_of_sockaddr = function
   | Unix.ADDR_UNIX s -> s
   | Unix.ADDR_INET (a,p) -> (Unix.string_of_inet_addr a) ^ ":" ^ (string_of_int p)
-
-let string_of_client c = string_of_sockaddr c.addr
 
 (* b is a uint8 *)
 let split_first_bit b =
@@ -37,10 +26,6 @@ let unmask_data mask data =
     Bytes.set data i (char_xor (Bytes.get data i) (Bytes.get mask (i mod 4)));
   done;
   data
-
-let is_controlop = function
-  | ContinuationFrame | TextFrame | BinaryFrame | NonControlFrame _ -> false
-  | Close | Ping | Pong | ControlFrame _ -> true
 
 let apply_opt f = function
   | None -> None

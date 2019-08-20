@@ -1,21 +1,35 @@
-(* This is a very simple HTTP/1.1 server implementation [RFC2616] *)
+(* This file implements a subset of HTTP/1.1 [RFC2616]
+   Its only purpose is to do a websocket handshake, it cannot be used as
+   regular HTTP server *)
 
-open Unix
-open Types
+exception HTTPError of string
+exception SyntaxError of string
 
 let print_address ff sockaddr =
   let addr =
     match sockaddr with
-    | ADDR_UNIX s -> s
-    | ADDR_INET (inet, port) ->
-      (string_of_inet_addr inet) ^ ":" ^ (string_of_int port)
+    | Unix.ADDR_UNIX s -> s
+    | Unix.ADDR_INET (inet, port) ->
+      (Unix.string_of_inet_addr inet) ^ ":" ^ (string_of_int port)
   in
   Printf.fprintf ff "%s" addr
 
+(* *)
 
 module FieldMap = Map.Make(String)
 
+let print_fields print_values ff fields =
+  let print_field ff (field, values) =
+    Printf.fprintf ff "%s : %a" field print_values values
+  in
+  FieldMap.iter
+    (fun field values -> Printf.fprintf ff "%a\n" print_field (field, values))
+    fields
+
+(* *)
+
 let ws_uuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+
 let build_server_key client_key =
   Logger.debug (fun m -> m "Got client key \"%s\"" client_key);
   let key = client_key ^ ws_uuid in
@@ -86,6 +100,9 @@ let string_of_method_ty = function
   | POST -> "POST" | PUT -> "PUT" | DELETE -> "DELETE"
   | TRACE -> "TRACE" | CONNECT -> "CONNECT"
 
+let print_method_ty ff typ =
+  Printf.fprintf ff "%s" (string_of_method_ty typ)
+
 (* *)
 
 type request = {
@@ -101,32 +118,24 @@ let fields req = req.fields
 let content req = req.content
 
 let print_request ff req =
-  let print_method_ty ff typ =
-    Printf.fprintf ff "%s" (string_of_method_ty typ)
-  in
   let print_values ff values =
     Printf.fprintf ff "%s" (String.concat ", " values)
-  in
-  let print_field ff (field, values) =
-    Printf.fprintf ff "%s : %a" field print_values values
-  in
-  let print_fields ff fields =
-    FieldMap.iter
-      (fun field values -> Printf.fprintf ff "%a\n" print_field (field, values))
-      fields
   in
   let print_content ff = function
     | None -> ()
     | Some s -> Printf.fprintf ff "%s" s
   in
   Printf.fprintf ff "%a %s HTTP/1.1\n%a\n\n%a"
-    print_method_ty (typ req) (uri req) print_fields (fields req)
+    print_method_ty (typ req) (uri req) (print_fields print_values) (fields req)
     print_content (content req)
 
 (* *)
 
 (* server type, it corresponds to the root location *)
-type t = Types.client
+type t = {
+  addr : Unix.sockaddr;
+  sock : Unix.file_descr
+}
 let addr serv = serv.addr
 let sock serv = serv.sock
 
@@ -179,22 +188,27 @@ let parse_request req =
 let create inet_addr =
   let tcp_protocol = 6 in
   Logger.info (fun m -> m "Starting server on %a" print_address inet_addr);
-  let sock = socket PF_INET SOCK_STREAM tcp_protocol in
-  setsockopt sock SO_REUSEADDR true;
-  bind sock inet_addr;
+  let sock = Unix.socket PF_INET SOCK_STREAM tcp_protocol in
+  Unix.setsockopt sock SO_REUSEADDR true;
+  Unix.bind sock inet_addr;
   { addr = inet_addr; sock = sock }
 
 let close serv =
-  shutdown (sock serv) SHUTDOWN_ALL;
+  Unix.shutdown (sock serv) SHUTDOWN_ALL;
   Unix.close (sock serv);
   Logger.info (fun m -> m "Server closed")
 
-let listen_and_accept serv =
-  listen (sock serv) 1;
-  Logger.info (fun m -> m "%s" "Listening to new connections");
-  let client_sock, client_addr = accept (sock serv) in
+let listen serv =
+  Unix.listen (sock serv) 1;
+  Logger.info (fun m -> m "%s" "Listening to new connections")
+
+let accept serv =
+  let client_sock, client_addr = Unix.accept (sock serv) in
   Logger.info (fun m -> m "Got a connection from %a" print_address client_addr);
   client_sock, client_addr
+
+let listen_and_accept serv =
+  listen serv; accept serv
 
 let send_response sock status fields =
   let message = "HTTP/1.1 " ^ status ^ "\n" ^
@@ -203,7 +217,7 @@ let send_response sock status fields =
                       fields)) ^
                 "\n\n"
   in
-  let code = send sock (Bytes.of_string message) 0 (String.length message) [] in
+  let code = Unix.send sock (Bytes.of_string message) 0 (String.length message) [] in
   Logger.info (fun m -> m "Sent:\n%s" message);
   code
 
@@ -213,7 +227,7 @@ let check_ws_opening_request req =
 
   let check_key key =
     if not (FieldMap.mem key req.fields) then
-      raise (WSError ("The opening HTTP request MUST contain a \"" ^ key ^
+      raise (HTTPError ("The opening HTTP request MUST contain a \"" ^ key ^
                       "\" field"))
   in
   let check_val key value =
@@ -222,7 +236,7 @@ let check_ws_opening_request req =
     if List.length field = 1 then
       if String.lowercase_ascii (List.hd field) = "websocket" then ()
     else
-      raise (WSError ("The opening HTTP request MUST contain an \"" ^ key ^
+      raise (HTTPError ("The opening HTTP request MUST contain an \"" ^ key ^
                       "\" field with value \"" ^ value ^ "\""))
   in
   let include_val key value =
@@ -231,14 +245,14 @@ let check_ws_opening_request req =
     let values = FieldMap.find key req.fields in
     let lowercase_values = List.map String.lowercase_ascii values in
     if not (List.mem lowercase_value lowercase_values) then
-      raise (WSError ("The opening HTTP request MUST contain a \"" ^ key ^
+      raise (HTTPError ("The opening HTTP request MUST contain a \"" ^ key ^
                       "\" field including the value \"" ^ value ^ "\""))
   in
 
 
   (* 1 - Request has to be a GET request*)
   if req.typ <> GET then
-    raise (WSError ("The opening HTTP request MUST be a GET, not a " ^
+    raise (HTTPError ("The opening HTTP request MUST be a GET, not a " ^
                     (string_of_method_ty req.typ)));
 
   (* 2 - A |Host| header field *)
@@ -254,11 +268,11 @@ let check_ws_opening_request req =
          when decoded, is 16 bytes in length *)
   let encoded_ws_key = FieldMap.find "Sec-WebSocket-Key" req.fields in
   if List.length encoded_ws_key <> 1 then
-    raise (WSError ("The field Sec-WebSocket-Key MUST have one (and only one) value"));
+    raise (HTTPError ("The field Sec-WebSocket-Key MUST have one (and only one) value"));
 
   let decoded_ws_key = Base64.decode (List.hd encoded_ws_key) in
   if String.length decoded_ws_key <> 16 then
-    raise (WSError ("The decoded WebSocket key has length " ^
+    raise (HTTPError ("The decoded WebSocket key has length " ^
                     (string_of_int (String.length decoded_ws_key)) ^
                     " while it was expected to have length 16"));
 
@@ -273,7 +287,7 @@ let check_ws_opening_request req =
 
 let do_ws_handshake sock =
   let rcv_buffer = Bytes.create 1024 in
-  ignore (recv sock rcv_buffer 0 1024 []);
+  ignore (Unix.recv sock rcv_buffer 0 1024 []);
   let req = Bytes.to_string rcv_buffer in
   (* If the message is more than 1024 bytes long, this won't work *)
   let req = String.sub req 0 (String.index req '\000') in
@@ -299,6 +313,7 @@ let do_ws_handshake sock =
 
   (* build response to opening request, page 22 *)
 
+  (* Note : Not used *)
   (* get origin key if present *)
   (* let origin =
     match FieldMap.find_opt "Origin" req.fields with
@@ -317,11 +332,11 @@ let do_ws_handshake sock =
   (* get version *)
   let version = FieldMap.find "Sec-WebSocket-Version" req.fields in
   if List.length version <> 1 then
-    raise (WSError ("The field Sec-WebSocket-Version MUST have one and only one value"));
+    raise (HTTPError ("The field Sec-WebSocket-Version MUST have one and only one value"));
   if (List.hd version) <> "13" then begin
     ignore (send_response sock "426 Upgrade Required" [
       "Sec-WebSocket-Version", "13" ]);
-    raise (WSError ("Unsupported WebSocket version" ^ (List.hd version)))
+    raise (HTTPError ("Unsupported WebSocket version" ^ (List.hd version)))
   end;
 
   (* subprotocol to use : none implemented yet *)

@@ -5,17 +5,16 @@ define find_rec
 endef
 
 OBJ = logger.cmo \
-types.cmo \
 utils.cmo \
 base64.cmo \
 sha1.cmo \
-websocket.cmo \
+ws.cmo \
 http.cmo
 
 all: websocketml.cma
 
-websocketml.cma: $(OBJ)
-	ocamlc -a -o $@ $(OBJ)
+websocketml.cma: $(OBJ) websocketml.cmi
+	ocamlc -a -o $@ $(OBJ) websocketml.ml
 
 clean:
 	@rm -f $(call find_rec,*.annot) $(call find_rec,*.cm[iox])
