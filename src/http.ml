@@ -336,34 +336,3 @@ let do_ws_handshake sock =
     "Connection", "Upgrade";
     "Sec-WebSocket-Accept", build_server_key encoded_ws_key;
   ]
-
-let local_http () =
-  let address = inet_addr_of_string "127.0.0.1" in
-  let port = 8080 in
-  let inet_addr = ADDR_INET(address, port) in
-  let connection_server = create inet_addr in
-  let client_sock, client_addr = listen_and_accept connection_server in
-  begin
-    try
-      do_ws_handshake client_sock;
-      let websock = Websocket.assign client_sock client_addr in
-      let Some msg = Websocket.receive_message websock in
-      Logger.info (fun m -> m "Received message: %s"
-                      begin match msg.msg_typ with
-                        | BinaryMsg -> "binary of length " ^ (string_of_int (Bytes.length msg.msg_data))
-                        | TextMsg -> Bytes.to_string msg.msg_data
-                      end);
-      Websocket.send_text websock "YOU rock bro!";
-      Logger.info (fun m -> m "Sent message : %s" "YOU rock bro!");
-      Websocket.send_ping websock (Bytes.of_string "Hello world");
-      Logger.info (fun m -> m "Sent ping");
-      let msg = Websocket.receive_message websock in
-      Logger.info (fun m -> m "Read message");
-      begin match msg with
-      | None -> Logger.info (fun m -> m "empty message")
-      | Some msg -> Logger.info (fun m -> m "Got : %s" (Bytes.to_string msg.msg_data))
-      end;
-      ()
-    with e -> Logger.error (fun m -> m "Exception : %s" (Printexc.to_string e))
-  end;
-  close connection_server

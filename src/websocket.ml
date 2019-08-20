@@ -14,7 +14,7 @@ type t = {
 
 let string_of_t sock = string_of_client sock.client
 
-let assign sock addr = {
+let create sock addr = {
   client = { sock = sock;
              addr = addr; };
   closed_in = false;
@@ -28,13 +28,19 @@ let closed_in sock = sock.closed_in
 let closed sock = sock.closed_in || sock.closed_out
 
 let recv_bytes sock size =
-  if closed_in sock then raise (Unix_error (ENOTCONN, "WebSocket.recv_bytes", string_of_t sock));
+  if closed_in sock then
+    raise (WSError
+             (Printf.sprintf
+                "WebSocket.recv_bytes : Connection is closed, cannot send \"%s\"" (string_of_t sock)));
   let rcv_buffer = Bytes.create size in
   recv (get_sock sock) rcv_buffer 0 size [];
   Logger.debug (fun m -> m "Received bytes\n%s" (hex_string_of_bytes rcv_buffer));
   rcv_buffer
 let send_bytes sock b =
-  if closed_out sock then raise (Unix_error (ENOTCONN, "WebSocket.send_bytes", Bytes.to_string b));
+  if closed_out sock then
+    raise (WSError
+             (Printf.sprintf
+                "WebSocket.send_bytes : Connection is closed, cannot send \"%s\"" (Bytes.to_string b)));
   Logger.debug (fun m -> m "Sending bytes\n%s" (hex_string_of_bytes b));
   send (get_sock sock) b 0 (Bytes.length b) []
 
@@ -69,7 +75,7 @@ let build_frame op data =
   let msg = Bytes.create length in
   (* the server does not perform any fragmentation for now, the FIN
      flag is always set to 1 *)
-  let first_byte = int_of_opcode op + 128 in
+  let first_byte = 128 + int_of_opcode op in
   set_uint8 msg 0 first_byte;
   (* the server does not mask its data, the MASK flag is always 0 *)
   Bytes.blit payload_len 0 msg 1 (1 + payload_len_additional_length);

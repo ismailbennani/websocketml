@@ -104,19 +104,3 @@ type client = {
   addr : Unix.sockaddr;
   sock : Unix.file_descr
 }
-
-module type WebsocketSig = sig
-  type t
-
-  val closed     : t -> bool
-  val closed_in  : t -> bool
-  val closed_out : t -> bool
-
-  val assign : Unix.file_descr -> Unix.sockaddr -> t
-  val receive_message : t -> msg option
-  val send_msg : t -> opcode -> bytes -> int
-  val send_ping : t -> bytes -> int
-  val send_text : t -> string -> int
-  val send_binary : t -> bytes -> int
-  val close : t -> status_code -> unit
-end
