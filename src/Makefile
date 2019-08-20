@@ -21,6 +21,7 @@ clean:
 	@rm -f .depend
 
 cleanall realclean mrproper: clean
+	rm -f websocketml.cma
 
 .depend:
 	@$(OCAMLDEP) $(INCLUDES) $(call find_rec,*.ml) $(call find_rec,*.mli) \
