@@ -150,6 +150,7 @@ type t = {
 }
 
 let to_string sock = string_of_client sock.client
+let print_t ff sock = Printf.fprintf ff "%s" (to_string sock)
 
 let create sock addr = {
   client = { sock = sock;

@@ -28,6 +28,7 @@ type exit_code =
 type t
 
 val to_string : t -> string
+val print_t : out_channel -> t -> unit
 
 val get_sock       : t -> Unix.file_descr
 val get_addr       : t -> Unix.sockaddr

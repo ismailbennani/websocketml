@@ -139,6 +139,9 @@ type t = {
 let addr serv = serv.addr
 let sock serv = serv.sock
 
+let to_string t = Utils.string_of_sockaddr t.addr
+let print_t ff t = Printf.fprintf ff "%s" (to_string t)
+
 (* *)
 
 let parse_request req =
