@@ -51,11 +51,10 @@ val close : t -> exit_code -> int
 (*                     HTTP                     *)
 (* ============================================ *)
 
-type http_t = Http.t
+module Http : module type of Http
 
-val http_create : Unix.sockaddr -> http_t
-val http_listen : http_t -> unit
-val http_accept : http_t -> Unix.file_descr * Unix.sockaddr
-val http_listen_and_accept : http_t -> Unix.file_descr * Unix.sockaddr
-val http_close : http_t -> unit
-val http_do_ws_handshake : Unix.file_descr -> unit
+(* ============================================ *)
+(*                   Logger                     *)
+(* ============================================ *)
+
+module Logger : module type of Logger
