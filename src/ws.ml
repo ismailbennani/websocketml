@@ -152,6 +152,13 @@ type t = {
 let to_string sock = string_of_client sock.client
 let print_t ff sock = Printf.fprintf ff "%s" (to_string sock)
 
+let warn excptn =
+  match excptn with
+  | WSError s
+  | NotImplemented s ->
+    Printf.eprintf "Warning: %s\n" s
+  | _ -> raise excptn
+
 let create sock addr = {
   client = { sock = sock;
              addr = addr; };
@@ -169,13 +176,11 @@ let recv_bytes sock rcv_buffer offset size =
   if closed_in sock then
     raise (WSError "WebSocket.recv_bytes : Connection is closed");
   let code = Unix.recv (get_sock sock) rcv_buffer offset size [] in
-  Logger.debug (fun m -> m "Received bytes\n%s" (hex_string_of_bytes rcv_buffer));
   code
 
 let send_bytes sock b =
   if closed_out sock then
     raise (WSError "WebSocket.send_bytes : Connection is closed");
-  Logger.debug (fun m -> m "Sending bytes\n%s" (hex_string_of_bytes b));
   Unix.send (get_sock sock) b 0 (Bytes.length b) []
 
 let build_frame op data =
@@ -189,12 +194,12 @@ let build_frame op data =
       0, res
     end else if data_len < 65536 then begin
       let res = Bytes.create 3 in
-      set_uint16_be res 0 126;
+      set_uint8 res 0 126;
       set_uint16_be res 1 data_len;
       2, res
     end else begin
       let res = Bytes.create 9 in
-      set_int64_be res 0 (Int64.of_int 127);
+      set_int8 res 0 127;
       set_int64_be res 1 (Int64.of_int data_len);
       8, res
     end
@@ -232,18 +237,20 @@ let send_close sock data = send_msg sock Close data
 let send_text sock msg = send_msg sock TextFrame (Bytes.of_string msg)
 let send_binary sock data = send_msg sock BinaryFrame data
 
-let close sock exit_code =
+let close_with_message sock exit_code msg =
   let data =
     if reserved_exit_code exit_code then Bytes.empty
     else begin
-      let data = Bytes.create 2 in
-      set_uint16_be data 0 (int_of_exit_code exit_code);
-      data
+      let exit_code_byte = Bytes.create 2 in
+      set_uint16_be exit_code_byte 0 (int_of_exit_code exit_code);
+      Bytes.cat exit_code_byte (Bytes.of_string msg)
     end
   in
   let code = send_close sock data in
   sock.closed_out <- true;
   code
+
+let close sock exit_code = close_with_message sock exit_code ""
 
 let do_close sock frame =
   (* optional exit code *)
@@ -254,7 +261,7 @@ let do_close sock frame =
   in
   let reason =
     if Bytes.length frame.frame_data > 2 then
-      Bytes.sub_string frame.frame_data 2 (Bytes.length frame.frame_data - 1)
+      Bytes.sub_string frame.frame_data 2 (Bytes.length frame.frame_data - 2)
     else ""
   in
   Logger.debug (fun m -> m "WebSocket connection closed with code %d and reason : %s" code reason);
@@ -277,7 +284,7 @@ let receive_frame sock =
 
   (* no extensions : RSV1/2/3 MUST be 0 *)
   if (opcode > 16) then
-    raise (WSError
+    warn (WSError
              ("No extension has been negotiated and RSV1/2/3 bits are not 0 (opcode = " ^
               (string_of_int opcode) ^ ")"));
 

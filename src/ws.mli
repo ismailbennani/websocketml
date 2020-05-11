@@ -43,3 +43,4 @@ val send_ping : t -> bytes -> int
 val send_text : t -> string -> int
 val send_binary : t -> bytes -> int
 val close : t -> exit_code -> int
+val close_with_message : t -> exit_code -> string -> int
