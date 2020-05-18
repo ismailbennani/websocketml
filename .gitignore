@@ -1,6 +1,8 @@
 config
 META
 opam
+docs/*
+!docs/css
 
 *.annot
 *.cmo
