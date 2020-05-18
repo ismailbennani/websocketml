@@ -66,14 +66,15 @@ let _ =
       ignore (Websocketml.send_ping websock (Bytes.of_string "Hello world"));
       Websocketml.Logger.info (fun m -> m "Sent ping");
 
-      (* this time we expect to get a CLOSE message, msg can be None *)
       Websocketml.Logger.info (fun m -> m "Waiting for message");
       let msg = ref (Websocketml.receive_message websock) in
+
       (* the stack of answers *)
       let msg_stack = ref msgs in
 
       while not (Websocketml.closed websock) && (List.length !msg_stack > 0) do
 
+        (* this time we expect to get a CLOSE message, msg can be None *)
         begin match !msg with
           | None -> Websocketml.Logger.info (fun m -> m "empty message")
           | Some msg -> Websocketml.Logger.info (fun m -> m "Got : %s" (Bytes.to_string msg.msg_data))

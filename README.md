@@ -6,6 +6,7 @@ A simple websocket library for OCaml with no dependencies
 Run a simple server
 ```
 make
+make examples
 cd examples/echo
 ./echo_server.byte
 ```

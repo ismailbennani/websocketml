@@ -2,7 +2,7 @@ include config
 
 .PHONY: lib examples test
 
-all: lib examples
+all: lib
 
 config:
 	./configure
