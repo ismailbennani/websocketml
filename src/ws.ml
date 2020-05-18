@@ -159,7 +159,7 @@ let warn excptn =
     Printf.eprintf "Warning: %s\n" s
   | _ -> raise excptn
 
-let create sock addr = {
+let create (sock, addr) = {
   client = { sock = sock;
              addr = addr; };
   closed_in = false;

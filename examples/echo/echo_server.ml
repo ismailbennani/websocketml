@@ -40,7 +40,7 @@ let _ =
       Websocketml.Http.do_ws_handshake client_sock;
 
       (* create the websocket connection *)
-      let websock = Websocketml.create client_sock client_addr in
+      let websock = Websocketml.create (client_sock, client_addr) in
 
       (* listen for a websocket message *)
       (* Note : it can be None, for example if the first frame

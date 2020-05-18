@@ -3,7 +3,6 @@
    regular HTTP server *)
 
 exception HTTPError of string
-exception SyntaxError of string
 
 let print_address ff sockaddr =
   let addr =
@@ -176,7 +175,7 @@ let parse_request req =
       else
         let aux = Str.bounded_split (Str.regexp ":") field_line 2 in
         if List.length aux <> 2 then
-          raise (SyntaxError field_line);
+          raise (HTTPError field_line);
         let field = String.trim (List.hd aux) in
         let values = List.hd (List.tl aux) in
         let values = String.split_on_char ',' values in
