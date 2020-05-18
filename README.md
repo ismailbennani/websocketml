@@ -1,4 +1,4 @@
-# websocketsml
+# websocketml
 A simple websocket library for OCaml with no dependencies
 
 ## Simple example
