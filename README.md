@@ -5,6 +5,7 @@ A simple websocket library for OCaml with no dependencies
 
 Run a simple server
 ```
+cd /path/to/websocketml
 make
 make examples
 cd examples/echo
@@ -13,9 +14,17 @@ cd examples/echo
 
 Then open `examples/echo/echo_client.html` in your favorite browser (with javascript enabled)
 
+## Install using `opam`
+
+```
+cd /path/to/websocketml
+opam install .
+```
+
 ## Build documentation
 
 ```
+cd /path/to/websocketml
 make
 make doc
 ```

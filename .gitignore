@@ -1,6 +1,4 @@
 config
-META
-opam
 docs/*
 !docs/css
 
