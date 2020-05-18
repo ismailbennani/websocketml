@@ -27,7 +27,13 @@ module EscCodes = struct
   let white        = "\027[1;37m"
 end
 
-let verbose = ref 1
+type verbose = ERROR | WARN | INFO | DEBUG
+
+let level_of_verbose = function
+  | ERROR -> 0 | WARN -> 1 | INFO -> 2 | DEBUG -> 3
+
+let verbose = ref INFO
+let set_verbose v = verbose := v
 
 let print ff color prefix f =
   Printf.fprintf ff "%s%-7s " color ("[" ^ prefix ^ "]");
@@ -36,13 +42,13 @@ let print ff color prefix f =
   flush stdout
 
 let print_level level ff color prefix f =
-  if level <= !verbose then print ff color prefix f
+  if level_of_verbose level <= level_of_verbose !verbose then print ff color prefix f
 
-let error f = print_level 0 stderr EscCodes.red "ERROR" f
-let warn f = print_level 1 stderr EscCodes.orange "WARN" f
+let error f = print_level ERROR stdout EscCodes.red "ERROR" f
+let warn f = print_level WARN stdout EscCodes.orange "WARN" f
 
-let info f = print_level 0 stdout EscCodes.light_blue "INFO" f
-let debug f = print_level 1 stdout EscCodes.yellow "DEBUG" f
+let info f = print_level INFO stdout EscCodes.light_blue "INFO" f
+let debug f = print_level DEBUG stdout EscCodes.yellow "DEBUG" f
 
 (* Test *)
 (* let _ =

@@ -37,7 +37,7 @@ type exit_code =
   | CustomCode of int   (** range 4000 - 4999 : private use *)
 
 (** Create a new connexion.
-    
+
     WARNING: this method assumes that the socket is already open and that
              the WebSocket handshake has already been performed. Refer to
              {!Http.create}, {!Http.listen_and_accept} and
@@ -142,6 +142,9 @@ end
 (** usage example: {v Logger.info (fun f -> f "[%s] %d" some_string some_int) v} *)
 module Logger :
 sig
+  type verbose = ERROR | WARN | INFO | DEBUG
+  val set_verbose : verbose -> unit
+
   val error : ((('a, out_channel, unit) format -> 'a) -> 'b) -> unit
   val warn : ((('a, out_channel, unit) format -> 'a) -> 'b) -> unit
   val info : ((('a, out_channel, unit) format -> 'a) -> 'b) -> unit
