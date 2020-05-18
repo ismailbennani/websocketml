@@ -1,0 +1,5 @@
+directory = "/usr/local/lib/websocketml"
+version = "0.0"
+description = "A simple websocket library for OCaml with no dependency"
+archive(byte) = "websocketml.cma"
+archive(native) = "websocketml.cmxa"

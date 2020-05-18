@@ -33,29 +33,3 @@ OCAMLFIND := ocamlfind
 %.cmx %.cmi: %.ml
 	\$(OCAMLOPT) -c -o \$@ \$(OCAMLFLAGS) \$(INCLUDES) \$<
 ENDOFFILE
-
-cat > META <<ENDOFFILE
-directory = "${prefix}/lib/websocketml"
-version = "${version}"
-description = "A simple websocket library for OCaml with no dependency"
-archive(byte) = "websocketml.cma"
-archive(native) = "websocketml.cmxa"
-ENDOFFILE
-
-cat > opam <<ENDOFFILE
-opam-version: "2.0"
-name: "websocketml"
-version: "${version}"
-synopsis: "A simple websocket library for OCaml with no dependency"
-maintainer: "ismailbennani <ismail.lahkim.bennani@ens.fr>"
-authors: "ismailbennani <ismail.lahkim.bennani@ens.fr>"
-license: "GPL-3.0"
-homepage: "https://github.com/ismailbennani/websocketml"
-bug-reports: "https://github.com/ismailbennani/websocketml/issues"
-build: [
-  ["./configure" "--prefix=%{prefix}%"]
-  [make]
-]
-install: [make "install"]
-dev-repo: "git+https://github.com/ismailbennani/websocketml"
-ENDOFFILE
