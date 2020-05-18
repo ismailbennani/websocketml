@@ -12,3 +12,12 @@ cd examples/echo
 ```
 
 Then open `examples/echo/echo_client.html` in your favorite browser (with javascript enabled)
+
+## Build documentation
+
+```
+make
+make doc
+```
+
+Then open `docs/index.html`.
