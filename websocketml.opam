@@ -1,15 +1,19 @@
 opam-version: "2.0"
 name: "websocketml"
-version: "0.0"
+version: "0.1"
 synopsis: "A simple websocket library for OCaml with no dependency"
 maintainer: "ismailbennani <ismail.lahkim.bennani@ens.fr>"
 authors: "ismailbennani <ismail.lahkim.bennani@ens.fr>"
-license: "GPL-3.0"
+license: "CeCILL-C"
 homepage: "https://github.com/ismailbennani/websocketml"
 bug-reports: "https://github.com/ismailbennani/websocketml/issues"
+depends: [
+  "ocaml" { >= "4.08" }
+  "ocamlfind" {build}
+]
 build: [
   ["./configure" "--prefix=%{prefix}%"]
-  [make]
+  [make "lib"]
 ]
 install: [make "install"]
 dev-repo: "git+https://github.com/ismailbennani/websocketml"

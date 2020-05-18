@@ -10,6 +10,7 @@ config:
 install: lib
 	mkdir -p $(LIBDIR)
 	cp lib/* $(LIBDIR)
+	$(OCAMLFIND) install fadbadml META
 
 lib: config
 	$(MAKE) -C src

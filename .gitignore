@@ -1,4 +1,5 @@
 config
+META
 docs/*
 !docs/css
 
