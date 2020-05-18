@@ -11,10 +11,13 @@ sha1.cmo \
 ws.cmo \
 http.cmo
 
-all: websocketml.cma
+all: websocketml.cma websocketml.cmxa
 
 websocketml.cma: $(OBJ) websocketml.cmi
 	ocamlc -a -o $@ $(OBJ) websocketml.ml
+
+websocketml.cmxa: $(OBJ:.cmo=.cmx) websocketml.cmi
+	ocamlopt -a -o $@ $(OBJ:.cmo=.cmx) websocketml.ml
 
 clean:
 	@rm -f $(call find_rec,*.annot) $(call find_rec,*.cm[iox])

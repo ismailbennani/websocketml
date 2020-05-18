@@ -15,7 +15,7 @@ install: lib
 lib: config
 	$(MAKE) -C src
 	mkdir -p lib
-	cp src/*.cmi src/*.cma lib
+	cp src/*.cmi src/*.cma src/*.cmxa src/*.a lib
 
 doc: lib
 	mkdir -p docs

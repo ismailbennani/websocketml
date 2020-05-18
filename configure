@@ -35,9 +35,9 @@ OCAMLFIND := ocamlfind
 ENDOFFILE
 
 cat > META <<ENDOFFILE
-directory = "${prefix}/lib/fadbadml"
+directory = "${prefix}/lib/websocketml"
 version = "${version}"
-description = "FADBAD++ for OCaml"
-archive(byte) = "fadbad.cma"
-archive(native) = "fadbad.cmxa"
+description = "A simple websocket library for OCaml with no dependency"
+archive(byte) = "websocketml.cma"
+archive(native) = "websocketml.cmxa"
 ENDOFFILE
