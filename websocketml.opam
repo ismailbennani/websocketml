@@ -13,7 +13,7 @@ depends: [
 ]
 build: [
   ["./configure" "--prefix=%{prefix}%"]
-  [make "lib"]
+  [make]
 ]
 install: [make "install"]
 dev-repo: "git+https://github.com/ismailbennani/websocketml"
