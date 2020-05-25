@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="css/doc_style.css" type="text/css">
+<meta content="text/html; charset=utf8" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Websocketml" rel="Chapter" href="Websocketml.html"><link title="WS" rel="Section" href="#1_WS">
+<link title="HTTP" rel="Section" href="#1_HTTP">
+<link title="Logger" rel="Section" href="#1_Logger">
+<link title="Read" rel="Subsection" href="#2_Read">
+<link title="Write" rel="Subsection" href="#2_Write">
+<link title="Helpers" rel="Subsection" href="#2_Helpers">
+<title>websocketml : Websocketml</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Websocketml.html">Websocketml</a></h1>
+
+<pre><span id="MODULEWebsocketml"><span class="keyword">module</span> Websocketml</span>: <code class="code">sig</code> <a href="Websocketml.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>This library implements <a href="https://tools.ietf.org/html/rfc6455">RFC6455</a>.
+    There are currently no supported extensions.</p>
+</div>
+</div>
+<hr width="100%">
+<h2 id="1_WS">WS</h2>
+<pre><span id="EXCEPTIONWSError"><span class="keyword">exception</span> WSError</span> <span class="keyword">of</span> <code class="type">string</code></pre>
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> </pre>
+
+
+<pre><code><span id="TYPEmsg_type"><span class="keyword">type</span> <code class="type"></code>msg_type</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmsg_type.BinaryMsg"><span class="constructor">BinaryMsg</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmsg_type.TextMsg"><span class="constructor">TextMsg</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEmsg"><span class="keyword">type</span> <code class="type"></code>msg</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmsg.msg_typ">msg_typ</span>&nbsp;: <code class="type"><a href="Websocketml.html#TYPEmsg_type">msg_type</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTmsg.msg_data">msg_data</span>&nbsp;: <code class="type">bytes</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEopcode"><span class="keyword">type</span> <code class="type"></code>opcode</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.ContinuationFrame"><span class="constructor">ContinuationFrame</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.TextFrame"><span class="constructor">TextFrame</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.BinaryFrame"><span class="constructor">BinaryFrame</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.Close"><span class="constructor">Close</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.Ping"><span class="constructor">Ping</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.Pong"><span class="constructor">Pong</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.ControlFrame"><span class="constructor">ControlFrame</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.NonControlFrame"><span class="constructor">NonControlFrame</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+
+</tr></table>
+
+<div class="info ">
+<div class="info-desc">
+<p>All these op codes are defined in the RFC</p>
+</div>
+</div>
+
+
+<pre><code><span id="TYPEexit_code"><span class="keyword">type</span> <code class="type"></code>exit_code</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.NormalClosure"><span class="constructor">NormalClosure</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1000</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.GoingAway"><span class="constructor">GoingAway</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1001</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.ProtocolError"><span class="constructor">ProtocolError</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1002</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.UnkownDatatype"><span class="constructor">UnkownDatatype</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1003</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.NoStatusCode"><span class="constructor">NoStatusCode</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1005</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.AbnormalClosure"><span class="constructor">AbnormalClosure</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1006</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.InconsistentData"><span class="constructor">InconsistentData</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1007</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.PolicyViolation"><span class="constructor">PolicyViolation</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1008</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.MsgTooBig"><span class="constructor">MsgTooBig</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1009</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.RequiredExtension"><span class="constructor">RequiredExtension</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1010</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.UnexpectedCondition"><span class="constructor">UnexpectedCondition</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1011</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.TLSFailure"><span class="constructor">TLSFailure</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>1015</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.ReservedCode"><span class="constructor">ReservedCode</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>ranges :
+                            0 - 999 : not used
+                            1000 - 2999 : reserved for websocket protocol
+                            3000 - 3999 : reserved for public libraries</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexit_code.CustomCode"><span class="constructor">CustomCode</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+<div class="info-desc">
+<p>range 4000 - 4999 : private use</p>
+</div>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+<div class="info-desc">
+<p>All these exit codes are defined in the RFC</p>
+</div>
+</div>
+
+
+<pre><span id="VALcreate"><span class="keyword">val</span> create</span> : <code class="type">Unix.file_descr * Unix.sockaddr -> <a href="Websocketml.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p>Create a new connexion.</p>
+
+<p>WARNING: this method assumes that the socket is already open and that
+             the WebSocket handshake has already been performed. Refer to
+             <a href="Websocketml.Http.html#VALcreate"><code class="code">create</code></a>, <a href="Websocketml.Http.html#VALlisten_and_accept"><code class="code">listen_and_accept</code></a> and
+             <a href="Websocketml.Http.html#VALdo_ws_handshake"><code class="code">do_ws_handshake</code></a> methods of module <a href="Websocketml.Http.html"><code class="code">Websocketml.Http</code></a>.</p>
+</div>
+</div>
+
+<pre><span id="VALget_sock"><span class="keyword">val</span> get_sock</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> Unix.file_descr</code></pre><div class="info ">
+<div class="info-desc">
+<p>Get the unix socket</p>
+</div>
+</div>
+
+<pre><span id="VALget_addr"><span class="keyword">val</span> get_addr</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> Unix.sockaddr</code></pre><div class="info ">
+<div class="info-desc">
+<p>Get remote address</p>
+</div>
+</div>
+<h3 id="2_Read">Read</h3>
+<pre><span id="VALreceive_message"><span class="keyword">val</span> receive_message</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> <a href="Websocketml.html#TYPEmsg">msg</a> option</code></pre><div class="info ">
+<div class="info-desc">
+<p>Block until a complete message is received. This method may read several
+    frames in a single call until it reaches the final frame of the message.</p>
+
+<p>If the received frame is a Close frame, it closes the connection and returns
+    None.</p>
+
+<p>If the received frame is a Ping, it answers with an appropriate Pong and
+    returns None.</p>
+
+<p>If the received frame is a Pong, it outputs a debug message and returns
+    None.</p>
+
+<p>Raise <a href="Websocketml.html#EXCEPTIONWSError"><code class="code">Websocketml.WSError</code></a> if the socket is closed or if the received message is
+    ill-formed.</p>
+</div>
+</div>
+<h3 id="2_Write">Write</h3><p>These method may raise <a href="Websocketml.html#EXCEPTIONWSError"><code class="code">Websocketml.WSError</code></a> if the socket is closed</p>
+
+<pre><span id="VALsend_msg"><span class="keyword">val</span> send_msg</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> <a href="Websocketml.html#TYPEopcode">opcode</a> -> bytes -> int</code></pre>
+<pre><span id="VALsend_ping"><span class="keyword">val</span> send_ping</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> bytes -> int</code></pre>
+<pre><span id="VALsend_text"><span class="keyword">val</span> send_text</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> string -> int</code></pre>
+<pre><span id="VALsend_binary"><span class="keyword">val</span> send_binary</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> bytes -> int</code></pre>
+<pre><span id="VALclose"><span class="keyword">val</span> close</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> <a href="Websocketml.html#TYPEexit_code">exit_code</a> -> int</code></pre>
+<pre><span id="VALclose_with_message"><span class="keyword">val</span> close_with_message</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> <a href="Websocketml.html#TYPEexit_code">exit_code</a> -> string -> int</code></pre><h3 id="2_Helpers">Helpers</h3>
+<pre><span id="VALclosed_in"><span class="keyword">val</span> closed_in</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return true if the socket cannot be read from</p>
+</div>
+</div>
+
+<pre><span id="VALclosed_out"><span class="keyword">val</span> closed_out</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return true if the socket cannot be written to</p>
+</div>
+</div>
+
+<pre><span id="VALclosed"><span class="keyword">val</span> closed</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<div class="info-desc">
+<p>Return true if the socket cannot be read from or written to</p>
+</div>
+</div>
+
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Websocketml.html#TYPEt">t</a> -> string</code></pre>
+<pre><span id="VALprint_t"><span class="keyword">val</span> print_t</span> : <code class="type">out_channel -> <a href="Websocketml.html#TYPEt">t</a> -> unit</code></pre><h2 id="1_HTTP">HTTP</h2>
+<pre><span id="MODULEHttp"><span class="keyword">module</span> <a href="Websocketml.Http.html">Http</a></span>: <code class="code">sig</code> <a href="Websocketml.Http.html">..</a> <code class="code">end</code></pre><div class="info">
+<p>Implement a subset of HTTP/1.1 <a href="https://tools.ietf.org/html/rfc2616">RFC2616</a>.</p>
+
+</div>
+<h2 id="1_Logger">Logger</h2>
+<pre><span id="MODULELogger"><span class="keyword">module</span> <a href="Websocketml.Logger.html">Logger</a></span>: <code class="code">sig</code> <a href="Websocketml.Logger.html">..</a> <code class="code">end</code></pre><div class="info">
+<p>usage example:</p>
+<pre class="verbatim">Logger.info (fun f -&gt; f "[%s] %d" some_string some_int)</pre>
+</div>
+</body></html>

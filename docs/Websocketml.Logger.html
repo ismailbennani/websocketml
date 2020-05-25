@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="css/doc_style.css" type="text/css">
+<meta content="text/html; charset=utf8" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Websocketml.Http.html">
+<link rel="Up" href="Websocketml.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Websocketml" rel="Chapter" href="Websocketml.html"><title>websocketml : Websocketml.Logger</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Websocketml.Http.html" title="Websocketml.Http">Previous</a>
+&nbsp;<a class="up" href="Websocketml.html" title="Websocketml">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Websocketml.Logger.html">Websocketml.Logger</a></h1>
+
+<pre><span id="MODULELogger"><span class="keyword">module</span> Logger</span>: <code class="code">sig</code> <a href="Websocketml.Logger.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>usage example:</p>
+<pre class="verbatim">Logger.info (fun f -&gt; f "[%s] %d" some_string some_int)</pre></div>
+</div>
+<hr width="100%">
+
+<pre><code><span id="TYPEverbose"><span class="keyword">type</span> <code class="type"></code>verbose</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTverbose.ERROR"><span class="constructor">ERROR</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTverbose.WARN"><span class="constructor">WARN</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTverbose.INFO"><span class="constructor">INFO</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTverbose.DEBUG"><span class="constructor">DEBUG</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="VALset_verbose"><span class="keyword">val</span> set_verbose</span> : <code class="type"><a href="Websocketml.Logger.html#TYPEverbose">verbose</a> -> unit</code></pre>
+<pre><span id="VALerror"><span class="keyword">val</span> error</span> : <code class="type">((('a, out_channel, unit) format -> 'a) -> 'b) -> unit</code></pre>
+<pre><span id="VALwarn"><span class="keyword">val</span> warn</span> : <code class="type">((('a, out_channel, unit) format -> 'a) -> 'b) -> unit</code></pre>
+<pre><span id="VALinfo"><span class="keyword">val</span> info</span> : <code class="type">((('a, out_channel, unit) format -> 'a) -> 'b) -> unit</code></pre>
+<pre><span id="VALdebug"><span class="keyword">val</span> debug</span> : <code class="type">((('a, out_channel, unit) format -> 'a) -> 'b) -> unit</code></pre></body></html>

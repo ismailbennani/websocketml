@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="css/doc_style.css" type="text/css">
+<meta content="text/html; charset=utf8" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="next" href="Websocketml.Logger.html">
+<link rel="Up" href="Websocketml.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Websocketml" rel="Chapter" href="Websocketml.html"><title>websocketml : Websocketml.Http</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="Websocketml.html" title="Websocketml">Up</a>
+&nbsp;<a class="post" href="Websocketml.Logger.html" title="Websocketml.Logger">Next</a>
+</div>
+<h1>Module <a href="type_Websocketml.Http.html">Websocketml.Http</a></h1>
+
+<pre><span id="MODULEHttp"><span class="keyword">module</span> Http</span>: <code class="code">sig</code> <a href="Websocketml.Http.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>Implement a subset of HTTP/1.1 <a href="https://tools.ietf.org/html/rfc2616">RFC2616</a>.
+    Its only purpose is to do a websocket handshake, it cannot be used as
+    regular HTTP server. One could use any other mean to retrieve an open
+    socket and client address to use as inputs of <a href="Websocketml.html#VALcreate"><code class="code">Websocketml.create</code></a>.</p>
+</div>
+</div>
+<hr width="100%">
+
+<pre><span id="EXCEPTIONHTTPError"><span class="keyword">exception</span> HTTPError</span> <span class="keyword">of</span> <code class="type">string</code></pre>
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> </pre>
+
+
+<pre><span id="VALcreate"><span class="keyword">val</span> create</span> : <code class="type">Unix.sockaddr -> <a href="Websocketml.Http.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p>Create a TCP socket and bind it to given address</p>
+</div>
+</div>
+
+<pre><span id="VALlisten"><span class="keyword">val</span> listen</span> : <code class="type"><a href="Websocketml.Http.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<div class="info-desc">
+<p>Set up the socket for receiving connection requests
+      (with a pending list of size 1)</p>
+</div>
+</div>
+
+<pre><span id="VALaccept"><span class="keyword">val</span> accept</span> : <code class="type"><a href="Websocketml.Http.html#TYPEt">t</a> -> Unix.file_descr * Unix.sockaddr</code></pre><div class="info ">
+<div class="info-desc">
+<p>Block until a connection is received and return the socket and address
+      of the connecting client</p>
+</div>
+</div>
+
+<pre><span id="VALlisten_and_accept"><span class="keyword">val</span> listen_and_accept</span> : <code class="type"><a href="Websocketml.Http.html#TYPEt">t</a> -> Unix.file_descr * Unix.sockaddr</code></pre><div class="info ">
+<div class="info-desc">
+<p>Call listen then accept</p>
+</div>
+</div>
+
+<pre><span id="VALdo_ws_handshake"><span class="keyword">val</span> do_ws_handshake</span> : <code class="type">Unix.file_descr -> unit</code></pre><div class="info ">
+<div class="info-desc">
+<p>Read a WebSocket opening request on the given socket and answer with
+      an appropriate message to complete the handshake defined
+      by <a href="https://tools.ietf.org/html/rfc6455">RFC6455</a>.</p>
+
+<p>Raise <a href="Websocketml.Http.html#EXCEPTIONHTTPError"><code class="code">HTTPError</code></a> if the received request is not a valid HTTP request or
+      if it is not a valid WebSocket opening request.</p>
+</div>
+</div>
+
+<pre><span id="VALclose"><span class="keyword">val</span> close</span> : <code class="type"><a href="Websocketml.Http.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<div class="info-desc">
+<p>Close the server's TCP socket</p>
+</div>
+</div>
+
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Websocketml.Http.html#TYPEt">t</a> -> string</code></pre>
+<pre><span id="VALprint_t"><span class="keyword">val</span> print_t</span> : <code class="type">out_channel -> <a href="Websocketml.Http.html#TYPEt">t</a> -> unit</code></pre></body></html>

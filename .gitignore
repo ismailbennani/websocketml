@@ -1,7 +1,5 @@
 config
 META
-docs/*
-!docs/css
 
 *.annot
 *.cmo
