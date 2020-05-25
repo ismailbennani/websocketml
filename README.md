@@ -1,5 +1,15 @@
 # websocketml
-A simple websocket library for OCaml with no dependencies
+A simple websocket library for OCaml with no dependencies.
+
+Documentation: http://www.ismailbennani.me/websocketml/Websocketml.html
+
+## Install using `opam`
+
+From this repo:
+```
+cd /path/to/websocketml
+opam install .
+```
 
 ## Simple example
 
@@ -13,20 +23,3 @@ cd examples/echo
 ```
 
 Then open `examples/echo/echo_client.html` in your favorite browser (with javascript enabled)
-
-## Install using `opam`
-
-```
-cd /path/to/websocketml
-opam install .
-```
-
-## Build documentation
-
-```
-cd /path/to/websocketml
-make
-make doc
-```
-
-Then open `docs/index.html`.
