@@ -145,13 +145,13 @@ let print_t ff t = Printf.fprintf ff "%s" (to_string t)
 
 let parse_request req =
   (* split header and content *)
-  let aux = Str.bounded_split_delim (Str.regexp "\n\n") req 2 in
+  let aux = Str.bounded_split_delim (Str.regexp "\(\r\n\r\n\)\|\(\n\n\)") req 2 in
 
-  let header = List.nth aux 0 in
+  let header = List.hd aux in
   let content = List.nth_opt aux 1 in
 
   (* split request line and field lines *)
-  let header_lines = String.split_on_char '\n' header in
+  let header_lines = Str.split (Str.regexp "\(\r\n\)\|\(\n\)") header in
   let request_line = List.hd header_lines in
   let field_lines = List.tl header_lines in
 
