@@ -175,7 +175,7 @@ let parse_request req =
       else
         let aux = Str.bounded_split (Str.regexp ":") field_line 2 in
         if List.length aux <> 2 then
-          raise (HTTPError field_line);
+          raise (HTTPError ("Not a valid field: " ^ field_line));
         let field = String.trim (List.hd aux) in
         let values = List.hd (List.tl aux) in
         let values = String.split_on_char ',' values in
