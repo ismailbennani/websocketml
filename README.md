@@ -5,6 +5,11 @@ Documentation: http://www.ismailbennani.me/websocketml/Websocketml.html
 
 ## Install using `opam`
 
+From opam repo:
+```
+opam install websocketml
+```
+
 From this repo:
 ```
 cd /path/to/websocketml
