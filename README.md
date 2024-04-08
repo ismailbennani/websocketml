@@ -1,7 +1,7 @@
 # websocketml
 A simple websocket library for OCaml with no dependencies.
 
-Documentation: http://www.ismailbennani.me/websocketml/Websocketml.html
+[Documentation](https://ismailbennani.github.io/websocketml/)
 
 ## Install using `opam`
 
